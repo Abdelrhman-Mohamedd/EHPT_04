@@ -28,7 +28,7 @@ fi
 zenity --info \
     --title="VaultTech Ethical Hacking Lab 04" \
     --width=460 \
-    --text="<b>Welcome to Lab 04: Basic Buffer Overflow</b>\n\nThis VM must be personalized using your unique <b>Student ID</b> before you can begin.\n\nThis lab covers:\n• Stack-based Buffer Overflows\n• Memory Corruption\n• Privilege Escalation\n\nClick <b>OK</b> to continue." \
+    --text="<b>Welcome to Lab 04: Advanced Buffer Overflow</b>\n\nThis VM must be personalized using your unique <b>Student ID</b> before you can begin.\n\nThis lab covers the OSCP Methodology:\n• Fuzzing & Offset Discovery\n• Bad Character Analysis\n• JMP RSP Gadget Hunting\n• Shellcode Generation\n\nClick <b>OK</b> to continue." \
     2>/dev/null || exit 1
 
 # ---- Student ID Input + Confirmation Loop ----
@@ -120,7 +120,7 @@ if [ "$SETUP_EXIT" -eq 0 ]; then
     zenity --info \
         --title="Lab 04 Ready! 🎉" \
         --width=480 \
-        --text="<b>Your lab environment is ready!</b>\n\n<b>Student ID:</b> ${SID}\n\nOpen a terminal and navigate to <b>/srv/labs/lab04/bin</b> to begin your buffer overflow challenge.\n\nGood luck!" \
+        --text="<b>Your lab environment is ready!</b>\n\n<b>Student ID:</b> ${SID}\n\nThe vulnerable Vault server is now running in the background on port 9999.\n\nOpen a terminal and type <b>nc 127.0.0.1 9999</b> to connect and begin your exploitation methodology.\n\nGood luck!" \
         2>/dev/null || true
 else
     SETUP_LOG=$(cat /tmp/lab04_setup.log 2>/dev/null | tail -20 || echo "No log output.")

@@ -1,10 +1,10 @@
 CC = gcc
-CFLAGS = -fno-stack-protector -z execstack -no-pie -g -O0
+CFLAGS = -g -O0 -fno-stack-protector -z execstack -no-pie
 
-all: vuln
+all: vault_server
 
-vuln: vuln.c
-	$(CC) $(CFLAGS) -o vuln vuln.c
+vault_server: vault_server.c
+	$(CC) $(CFLAGS) -o vault_server vault_server.c
 
 clean:
-	rm -f vuln
+	rm -f vault_server

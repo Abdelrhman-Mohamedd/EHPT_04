@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Instructor Tool: Student Flag Generator & Submission Verifier for Lab 04
-Lab 04 Theme: Buffer Overflow
+Lab 04 Theme: OSCP-style Remote Buffer Overflow
 """
 import sys, hashlib, argparse
 
@@ -14,7 +14,7 @@ def derive_flag(student_id: str, vuln_type: str, salt: str = DEFAULT_SALT) -> st
 
 def get_student_flags(student_id: str, salt: str = DEFAULT_SALT) -> dict:
     return {
-        "BOF (Basic Buffer Overflow)":   derive_flag(student_id, "BOF",  salt),
+        "BOF (Remote Buffer Overflow)":   derive_flag(student_id, "BOF",  salt),
     }
 
 def main():
