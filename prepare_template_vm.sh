@@ -77,7 +77,7 @@ pip3 install pwntools >/dev/null 2>&1 || echo "    [!] pwntools install failed."
 echo "[+] Step 2b: Installing Metasploit Framework (for msfvenom)..."
 curl -s https://raw.githubusercontent.com/rapid7/metasploit-omnibus/master/config/templates/metasploit-framework-wrappers/msfupdate.erb > /tmp/msfinstall
 chmod 755 /tmp/msfinstall
-/tmp/msfinstall >/dev/null 2>&1 && echo "    Metasploit installed successfully." || echo "    [!] Metasploit installation failed."
+/tmp/msfinstall
 rm -f /tmp/msfinstall
 
 # Create symlinks for pattern tools which aren't always symlinked by default
