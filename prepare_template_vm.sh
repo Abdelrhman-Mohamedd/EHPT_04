@@ -84,10 +84,20 @@ enabled=1
 EOF
 dnf install -y metasploit-framework || echo "    [!] Metasploit installation failed."
 
-# Create symlinks for pattern tools which aren't always symlinked by default
-ln -sf /opt/metasploit-framework/bin/msf-pattern_create /usr/local/bin/msf-pattern_create || true
-ln -sf /opt/metasploit-framework/bin/msf-pattern_offset /usr/local/bin/msf-pattern_offset || true
+# Create wrappers for pattern tools (new Metasploit RPMs hide these inside tools/exploit/)
+cat << 'EOF' > /usr/local/bin/msf-pattern_create
+#!/bin/bash
+export PATH="/opt/metasploit-framework/embedded/bin:$PATH"
+exec ruby /opt/metasploit-framework/embedded/framework/tools/exploit/pattern_create.rb "$@"
+EOF
+chmod +x /usr/local/bin/msf-pattern_create
 
+cat << 'EOF' > /usr/local/bin/msf-pattern_offset
+#!/bin/bash
+export PATH="/opt/metasploit-framework/embedded/bin:$PATH"
+exec ruby /opt/metasploit-framework/embedded/framework/tools/exploit/pattern_offset.rb "$@"
+EOF
+chmod +x /usr/local/bin/msf-pattern_offset
 # ---- 3. Write the secret salt to /etc/lab04.conf (root:root 600 — student CANNOT read) ----
 echo "[+] Step 3: Storing secret salt in /etc/lab04.conf (root-only)..."
 echo "${SECRET_SALT}" > /etc/lab04.conf

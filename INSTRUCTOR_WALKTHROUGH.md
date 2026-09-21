@@ -52,13 +52,13 @@ Once the service crashes, you need to find the exact offset.
 
 1. Generate a cyclic pattern:
 ```bash
-/opt/metasploit-framework/bin/msf-pattern_create -l 800
+msf-pattern_create -l 800
 ```
 2. Send the pattern using a modified fuzzer or netcat.
 3. Check the crash in GDB or the system logs to see what overwrote `RIP` (e.g., `0x3965413865413765`).
 4. Find the offset:
 ```bash
-/opt/metasploit-framework/bin/msf-pattern_offset -q 0x3965413865413765
+msf-pattern_offset -q 0x3965413865413765
 # Result: Exact match at offset 520
 ```
 
