@@ -55,7 +55,7 @@ Once the service crashes, you need to find the exact offset.
 msf-pattern_create -l 800
 ```
 2. Send the pattern using a modified fuzzer or netcat.
-3. Check the crash in GDB or the system logs to see what overwrote `RIP` (e.g., `0x3965413865413765`).
+3. Check `/tmp/vault_crash.log` to see what overwrote `RIP` (e.g., `0x3965413865413765`).
 4. Find the offset:
 ```bash
 msf-pattern_offset -q 0x3965413865413765
