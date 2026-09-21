@@ -80,6 +80,10 @@ chmod 755 /tmp/msfinstall
 /tmp/msfinstall >/dev/null 2>&1 && echo "    Metasploit installed successfully." || echo "    [!] Metasploit installation failed."
 rm -f /tmp/msfinstall
 
+# Create symlinks for pattern tools which aren't always symlinked by default
+ln -sf /opt/metasploit-framework/bin/msf-pattern_create /usr/local/bin/msf-pattern_create || true
+ln -sf /opt/metasploit-framework/bin/msf-pattern_offset /usr/local/bin/msf-pattern_offset || true
+
 # ---- 3. Write the secret salt to /etc/lab04.conf (root:root 600 — student CANNOT read) ----
 echo "[+] Step 3: Storing secret salt in /etc/lab04.conf (root-only)..."
 echo "${SECRET_SALT}" > /etc/lab04.conf

