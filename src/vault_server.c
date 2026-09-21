@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,6 +7,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <signal.h>
+#include <ucontext.h>
 
 #define PORT 9999
 #ifndef FLAG_CRASH
@@ -27,10 +29,14 @@ void debug_offset() {
 }
 
 // Intermediate Flag 1: The student must crash the service
-void sigsegv_handler(int sig) {
+void sigsegv_handler(int sig, siginfo_t *info, void *ucontext) {
+    ucontext_t *uc = (ucontext_t *)ucontext;
+    unsigned long long rip = uc->uc_mcontext.gregs[REG_RIP];
+
     FILE *f = fopen("/tmp/vault_crash.log", "w");
     if(f) {
         fprintf(f, "CRASH DETECTED! Flag 1: FLAG{%s}\n", FLAG_CRASH);
+        fprintf(f, "Instruction Pointer (RIP) at crash: 0x%llx\n", rip);
         fclose(f);
     }
     // Restore default handler and re-raise to dump core
@@ -97,7 +103,12 @@ int main() {
     
     // Prevent zombies and handle crashes
     signal(SIGCHLD, SIG_IGN);
-    signal(SIGSEGV, sigsegv_handler);
+    
+    struct sigaction sa;
+    sa.sa_flags = SA_SIGINFO;
+    sa.sa_sigaction = sigsegv_handler;
+    sigemptyset(&sa.sa_mask);
+    sigaction(SIGSEGV, &sa, NULL);
     
     server_sock = socket(AF_INET, SOCK_STREAM, 0);
     if (server_sock < 0) {
