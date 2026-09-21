@@ -78,7 +78,7 @@ echo "[+] Step 2b: Installing Metasploit Framework (for msfvenom)..."
 cat << 'EOF' > /etc/yum.repos.d/metasploit-framework.repo
 [metasploit]
 name=Metasploit
-baseurl=https://rpm.metasploit.com/rpm
+baseurl=https://downloads.metasploit.com/data/releases/metasploit-framework/rpm
 gpgcheck=0
 enabled=1
 EOF
