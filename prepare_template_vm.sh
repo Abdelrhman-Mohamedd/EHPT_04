@@ -142,11 +142,17 @@ EOF
 chmod 440 /etc/sudoers.d/lab04-setup
 visudo -c -f /etc/sudoers.d/lab04-setup && echo "    Sudoers rule OK at /etc/sudoers.d/lab04-setup" || echo "[!] sudoers syntax error!"
 
-# ---- 7. Harden SSH: disable root login ----
-echo "[+] Step 7: Hardening SSH configuration..."
+# ---- 7. Harden SSH & Disable SELinux ----
+echo "[+] Step 7: Hardening SSH and Disabling SELinux..."
 sed -i 's/^#*PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config
 systemctl reload sshd 2>/dev/null || true
 echo "    Root SSH login disabled."
+
+if command -v setenforce >/dev/null 2>&1; then
+    setenforce 0 2>/dev/null || true
+    sed -i 's/^SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config 2>/dev/null || true
+    echo "    SELinux has been disabled (required for buffer overflow & reverse shell)."
+fi
 
 # ---- 8. Set appliance-mode login banner ----
 echo "[+] Step 8: Setting pre-login banner..."

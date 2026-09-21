@@ -34,6 +34,7 @@ cd "${SCRIPT_DIR}/src"
 make clean
 make
 cp vault_server /srv/labs/lab04/bin/
+chmod +x /srv/labs/lab04/bin/vault_server
 cd "${SCRIPT_DIR}"
 
 echo "[+] Step 4: Injecting flag (Strict permissions)..."
