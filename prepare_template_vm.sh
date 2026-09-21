@@ -71,14 +71,18 @@ fi
 
 # ---- 2. Install Dependencies (GUI & Exploitation Tools) ----
 echo "[+] Step 2: Installing dependencies (zenity, gcc, gdb, nc, pwntools)..."
-dnf install -y zenity gcc make gdb binutils python3 python3-pip nmap-ncat curl >/dev/null 2>&1 && echo "    Dependencies installed successfully." || echo "    [!] Dependency install failed — check DNF."
-pip3 install pwntools >/dev/null 2>&1 || echo "    [!] pwntools install failed."
+dnf install -y zenity gcc make cmake gdb binutils python3 python3-pip python3-devel nmap-ncat curl >/dev/null 2>&1 && echo "    Dependencies installed successfully." || echo "    [!] Dependency install failed — check DNF."
+pip3 install --break-system-packages pwntools >/dev/null 2>&1 || pip3 install pwntools >/dev/null 2>&1 || echo "    [!] pwntools install failed."
 
 echo "[+] Step 2b: Installing Metasploit Framework (for msfvenom)..."
-curl -s https://raw.githubusercontent.com/rapid7/metasploit-omnibus/master/config/templates/metasploit-framework-wrappers/msfupdate.erb > /tmp/msfinstall
-chmod 755 /tmp/msfinstall
-/tmp/msfinstall
-rm -f /tmp/msfinstall
+cat << 'EOF' > /etc/yum.repos.d/metasploit-framework.repo
+[metasploit]
+name=Metasploit
+baseurl=https://rpm.metasploit.com/rpm
+gpgcheck=0
+enabled=1
+EOF
+dnf install -y metasploit-framework || echo "    [!] Metasploit installation failed."
 
 # Create symlinks for pattern tools which aren't always symlinked by default
 ln -sf /opt/metasploit-framework/bin/msf-pattern_create /usr/local/bin/msf-pattern_create || true
