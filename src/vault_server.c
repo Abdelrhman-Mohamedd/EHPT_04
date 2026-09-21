@@ -8,6 +8,35 @@
 #include <signal.h>
 
 #define PORT 9999
+#ifndef FLAG_CRASH
+#define FLAG_CRASH "LOCAL_TEST_CRASH_FLAG"
+#endif
+
+#ifndef FLAG_OFFSET
+#define FLAG_OFFSET "LOCAL_TEST_OFFSET_FLAG"
+#endif
+
+// Intermediate Flag 2: The student must overwrite RIP with this address
+void debug_offset() {
+    FILE *f = fopen("/tmp/vault_offset.log", "w");
+    if(f) {
+        fprintf(f, "OFFSET CONTROLLED! Flag 2: FLAG{%s}\n", FLAG_OFFSET);
+        fclose(f);
+    }
+    exit(0);
+}
+
+// Intermediate Flag 1: The student must crash the service
+void sigsegv_handler(int sig) {
+    FILE *f = fopen("/tmp/vault_crash.log", "w");
+    if(f) {
+        fprintf(f, "CRASH DETECTED! Flag 1: FLAG{%s}\n", FLAG_CRASH);
+        fclose(f);
+    }
+    // Restore default handler and re-raise to dump core
+    signal(SIGSEGV, SIG_DFL);
+    raise(SIGSEGV);
+}
 
 // Artificial gadget to ensure a reliable JMP RSP is available
 // since we compile without PIE but the system libraries might be randomized
@@ -66,8 +95,9 @@ int main() {
     struct sockaddr_in server_addr, client_addr;
     socklen_t client_len = sizeof(client_addr);
     
-    // Prevent zombies
+    // Prevent zombies and handle crashes
     signal(SIGCHLD, SIG_IGN);
+    signal(SIGSEGV, sigsegv_handler);
     
     server_sock = socket(AF_INET, SOCK_STREAM, 0);
     if (server_sock < 0) {

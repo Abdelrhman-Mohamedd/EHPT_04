@@ -14,7 +14,9 @@ def derive_flag(student_id: str, vuln_type: str, salt: str = DEFAULT_SALT) -> st
 
 def get_student_flags(student_id: str, salt: str = DEFAULT_SALT) -> dict:
     return {
-        "BOF (Remote Buffer Overflow)":   derive_flag(student_id, "BOF",  salt),
+        "Flag 1 (Crash the Service)":     derive_flag(student_id, "CRASH", salt),
+        "Flag 2 (Control the Offset)":    derive_flag(student_id, "OFFSET", salt),
+        "Flag 3 (Reverse Shell)":         derive_flag(student_id, "BOF", salt),
     }
 
 def main():

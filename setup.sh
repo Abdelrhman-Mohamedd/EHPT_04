@@ -20,6 +20,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 echo "==[🔒] Lab 04 — Personalizing for: ${STUDENT_ID} =="
 
+FLAG_CRASH=$(echo -n "${STUDENT_ID}_CRASH_${SECRET_SALT}" | sha256sum | cut -c1-32)
+FLAG_OFFSET=$(echo -n "${STUDENT_ID}_OFFSET_${SECRET_SALT}" | sha256sum | cut -c1-32)
 FLAG_BOF=$(echo -n  "${STUDENT_ID}_BOF_${SECRET_SALT}"  | sha256sum | cut -c1-32)
 
 echo "[+] Step 1: System user 'lab04' (Service Account)..."
@@ -32,7 +34,8 @@ mkdir -p /srv/labs/lab04/bin
 echo "[+] Step 3: Compiling Vault Server..."
 cd "${SCRIPT_DIR}/src"
 make clean
-make
+# Pass the flags into the C code using GCC macros
+make CFLAGS="-g -O0 -fno-stack-protector -z execstack -no-pie -DFLAG_CRASH=\"\\\"${FLAG_CRASH}\\\"\" -DFLAG_OFFSET=\"\\\"${FLAG_OFFSET}\\\"\""
 cp vault_server /srv/labs/lab04/bin/
 chmod +x /srv/labs/lab04/bin/vault_server
 cd "${SCRIPT_DIR}"
