@@ -68,9 +68,11 @@ systemctl daemon-reload
 systemctl enable lab04-vault
 systemctl restart lab04-vault
 
-echo "[+] Step 6: System Config (ASLR disabled)..."
+echo "[+] Step 6: System Config (ASLR & dmesg)..."
 echo 0 > /proc/sys/kernel/randomize_va_space || true
 echo "kernel.randomize_va_space = 0" > /etc/sysctl.d/99-disable-aslr.conf || true
+sysctl -w kernel.dmesg_restrict=0 || true
+echo "kernel.dmesg_restrict = 0" >> /etc/sysctl.d/99-disable-aslr.conf || true
 
 echo "[+] Step 7: Hostname & banner..."
 HOSTNAME_TARGET="lab04-${STUDENT_ID//_/-}"
