@@ -70,8 +70,15 @@ if [ -n "$SUDO_USER" ] && [ "$SUDO_USER" != "root" ]; then
 fi
 
 # ---- 2. Install Dependencies (GUI & Exploitation Tools) ----
-echo "[+] Step 2: Installing dependencies (zenity, gcc, gdb, etc.)..."
-dnf install -y zenity gcc make gdb binutils python3 >/dev/null 2>&1 && echo "    Dependencies installed successfully." || echo "    [!] Dependency install failed — check DNF."
+echo "[+] Step 2: Installing dependencies (zenity, gcc, gdb, nc, pwntools)..."
+dnf install -y zenity gcc make gdb binutils python3 python3-pip nmap-ncat curl >/dev/null 2>&1 && echo "    Dependencies installed successfully." || echo "    [!] Dependency install failed — check DNF."
+pip3 install pwntools >/dev/null 2>&1 || echo "    [!] pwntools install failed."
+
+echo "[+] Step 2b: Installing Metasploit Framework (for msfvenom)..."
+curl -s https://raw.githubusercontent.com/rapid7/metasploit-omnibus/master/config/templates/metasploit-framework-wrappers/msfupdate.erb > /tmp/msfinstall
+chmod 755 /tmp/msfinstall
+/tmp/msfinstall >/dev/null 2>&1 && echo "    Metasploit installed successfully." || echo "    [!] Metasploit installation failed."
+rm -f /tmp/msfinstall
 
 # ---- 3. Write the secret salt to /etc/lab04.conf (root:root 600 — student CANNOT read) ----
 echo "[+] Step 3: Storing secret salt in /etc/lab04.conf (root-only)..."
