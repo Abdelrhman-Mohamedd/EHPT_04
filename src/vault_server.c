@@ -32,11 +32,14 @@ void debug_offset() {
 void sigsegv_handler(int sig, siginfo_t *info, void *ucontext) {
     ucontext_t *uc = (ucontext_t *)ucontext;
     unsigned long long rip = uc->uc_mcontext.gregs[REG_RIP];
+    unsigned long long rsp = uc->uc_mcontext.gregs[REG_RSP];
+    unsigned long long fault_addr = *(unsigned long long *)rsp;
 
     FILE *f = fopen("/tmp/vault_crash.log", "w");
     if(f) {
         fprintf(f, "CRASH DETECTED! Flag 1: FLAG{%s}\n", FLAG_CRASH);
         fprintf(f, "Instruction Pointer (RIP) at crash: 0x%llx\n", rip);
+        fprintf(f, "Faulting Return Address (at RSP): 0x%llx\n", fault_addr);
         fclose(f);
     }
     // Restore default handler and re-raise to dump core
