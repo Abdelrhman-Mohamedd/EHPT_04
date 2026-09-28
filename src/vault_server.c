@@ -97,10 +97,11 @@ void process_auth(char *input) {
         
         filter_bad_chars(password);
         
+        // Call printf BEFORE strcpy so it doesn't clobber the RAX register!
+        printf("[DEBUG] Auth check complete for: %s\n", password);
+        
         // VULNERABILITY: Unbounded copy into 512-byte buffer
         strcpy(buffer, password);
-        
-        printf("[DEBUG] Auth check complete for: %s\n", buffer);
     } else {
         printf("Unknown command.\n");
     }
