@@ -10,19 +10,32 @@
 #include <ucontext.h>
 
 #define PORT 9999
-#ifndef FLAG_CRASH
-#define FLAG_CRASH "LOCAL_TEST_CRASH_FLAG"
-#endif
 
-#ifndef FLAG_OFFSET
-#define FLAG_OFFSET "LOCAL_TEST_OFFSET_FLAG"
-#endif
+// Flag file paths (root:lab04 600 — student cannot read these)
+#define FLAG_CRASH_FILE  "/etc/lab04_flag_crash"
+#define FLAG_OFFSET_FILE "/etc/lab04_flag_offset"
+
+// Read a flag from a root-owned file at runtime (anti-cheat: no strings in binary)
+static int read_flag(const char *path, char *buf, size_t bufsz) {
+    FILE *f = fopen(path, "r");
+    if (!f) return -1;
+    if (!fgets(buf, bufsz, f)) { fclose(f); return -1; }
+    // Strip trailing newline
+    buf[strcspn(buf, "\n")] = '\0';
+    fclose(f);
+    return 0;
+}
 
 // Intermediate Flag 2: The student must overwrite RIP with this address
 void debug_offset() {
+    char flag[128];
     FILE *f = fopen("/tmp/vault_offset.log", "w");
     if(f) {
-        fprintf(f, "OFFSET CONTROLLED! Flag 2: FLAG{%s}\n", FLAG_OFFSET);
+        if (read_flag(FLAG_OFFSET_FILE, flag, sizeof(flag)) == 0) {
+            fprintf(f, "OFFSET CONTROLLED! Flag 2: %s\n", flag);
+        } else {
+            fprintf(f, "OFFSET CONTROLLED! But could not read flag file.\n");
+        }
         fclose(f);
     }
     exit(0);
@@ -41,9 +54,14 @@ void sigsegv_handler(int sig, siginfo_t *info, void *ucontext) {
         faulting_addr = *rsp_ptr;
     }
 
+    char flag[128];
     FILE *f = fopen("/tmp/vault_crash.log", "w");
     if(f) {
-        fprintf(f, "CRASH DETECTED! Flag 1: FLAG{%s}\n", FLAG_CRASH);
+        if (read_flag(FLAG_CRASH_FILE, flag, sizeof(flag)) == 0) {
+            fprintf(f, "CRASH DETECTED! Flag 1: %s\n", flag);
+        } else {
+            fprintf(f, "CRASH DETECTED! But could not read flag file.\n");
+        }
         fprintf(f, "Instruction Pointer (RIP) at crash: 0x%llx\n", rip);
         fprintf(f, "Faulting Return Address (at RSP): 0x%llx\n", faulting_addr);
         fclose(f);

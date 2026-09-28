@@ -31,19 +31,30 @@ id -u lab04 >/dev/null 2>&1 || useradd --system --create-home --shell=/usr/sbin/
 echo "[+] Step 2: Directory structure..."
 mkdir -p /srv/labs/lab04/bin
 
-echo "[+] Step 3: Compiling Vault Server..."
+echo "[+] Step 3: Compiling Vault Server (no flags in binary — anti-cheat)..."
 cd "${SCRIPT_DIR}/src"
 make clean
-# Pass the flags into the C code using GCC macros
-make CFLAGS="-g -O0 -fno-stack-protector -z execstack -no-pie -DFLAG_CRASH=\"\\\"${FLAG_CRASH}\\\"\" -DFLAG_OFFSET=\"\\\"${FLAG_OFFSET}\\\"\""
+make CFLAGS="-g -O0 -fno-stack-protector -z execstack -no-pie"
 cp vault_server /srv/labs/lab04/bin/
-chmod +x /srv/labs/lab04/bin/vault_server
+chown lab04:lab04 /srv/labs/lab04/bin/vault_server
+chmod 755 /srv/labs/lab04/bin/vault_server
 cd "${SCRIPT_DIR}"
 
-echo "[+] Step 4: Injecting flag (Strict permissions)..."
+echo "[+] Step 4: Injecting flags (Strict permissions — lab04 only)..."
+# Flag 3: Final flag (reverse shell required)
 echo "FLAG{${FLAG_BOF}}" > /etc/lab04_flag
 chown lab04:lab04 /etc/lab04_flag
 chmod 600 /etc/lab04_flag
+
+# Flag 1: Crash flag (read at runtime by the binary's signal handler)
+echo "FLAG{${FLAG_CRASH}}" > /etc/lab04_flag_crash
+chown lab04:lab04 /etc/lab04_flag_crash
+chmod 600 /etc/lab04_flag_crash
+
+# Flag 2: Offset flag (read at runtime by the binary's debug_offset function)
+echo "FLAG{${FLAG_OFFSET}}" > /etc/lab04_flag_offset
+chown lab04:lab04 /etc/lab04_flag_offset
+chmod 600 /etc/lab04_flag_offset
 
 echo "[+] Step 5: Systemd Service Configuration..."
 cat << EOF > /etc/systemd/system/lab04-vault.service
