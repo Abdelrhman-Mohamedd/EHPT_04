@@ -2,6 +2,8 @@
 
 This document provides the exact, copy-pasteable scripts and commands required to solve the Lab 04 buffer overflow.
 
+> **Note:** All memory addresses in this walkthrough (e.g., `0x401176`, `0x40053c`) are illustrative examples. Run `objdump` on your own compiled binary to find the actual addresses — they will differ per build.
+
 ---
 
 ## 1. Fuzzer Script (`fuzzer.py`)
@@ -55,7 +57,7 @@ Once the service crashes, you need to find the exact offset.
 msf-pattern_create -l 800
 ```
 2. Send the pattern using a modified fuzzer or netcat.
-3. Check `/tmp/vault_crash.log` to see what overwrote `RIP` (e.g., `0x3965413865413765`).
+3. Check `/tmp/vault_crash.log` — look at the **Faulting Return Address (at RSP)** line (e.g., `0x3965413865413765`). Because 64-bit non-canonical addresses fault during the `ret` instruction, RIP will just point to `ret` itself — the actual overwritten address is at RSP.
 4. Find the offset:
 ```bash
 msf-pattern_offset -q 0x3965413865413765

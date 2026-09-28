@@ -13,7 +13,7 @@ To solve this lab, students must successfully perform:
 1. **Fuzzing:** Writing a Python fuzzer to crash the service.
 2. **Offset Discovery:** Using cyclic patterns to find the exact RIP offset.
 3. **Bad Character Analysis:** Systematically discovering which characters the custom `filter_bad_chars()` function breaks on (e.g., `\x00`, `\x0a`, `\x0d`, `\x2b`).
-4. **Gadget Hunting:** Locating the embedded `JMP RSP` gadget to execute stack payloads.
+4. **Gadget Hunting:** Locating the embedded `JMP RAX` gadget to redirect execution to the buffer.
 5. **Shellcode Generation:** Using `msfvenom` to create an encoded reverse shell.
 6. **Local Privilege Escalation:** Catching the reverse shell, which will execute as the `lab04` service account, allowing access to the protected flag.
 

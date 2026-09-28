@@ -82,7 +82,7 @@ cat << EOF > /etc/motd
   VaultTech Ethical Hacking Black-Box Appliance (Lab 04)
   Student ID  : ${STUDENT_ID}
   Target      : Remote Service on 127.0.0.1:9999
-  Methodology : Fuzz -> Offset -> Bad Chars -> JMP RSP -> Shellcode
+  Methodology : Fuzz -> Offset -> Bad Chars -> JMP RAX -> Shellcode
 ==============================================================================
 EOF
 cp /etc/motd /etc/issue

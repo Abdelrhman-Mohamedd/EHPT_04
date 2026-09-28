@@ -1,0 +1,19 @@
+# Compiled binaries
+src/vault_server
+*.o
+
+# Test scratch files
+test_*.py
+test_gp
+test_si
+test_gp.c
+test_si.c
+
+# Stale binaries from other labs
+src/vuln
+src/vuln1_bof
+src/vuln2_fmt
+src/vuln3_int
+src/vuln4_cmd
+src/vuln5_path
+src/payload

@@ -53,10 +53,11 @@ void sigsegv_handler(int sig, siginfo_t *info, void *ucontext) {
     raise(SIGSEGV);
 }
 
-// Artificial gadget to ensure a reliable JMP RSP is available
-// since we compile without PIE but the system libraries might be randomized
+// Artificial gadget: JMP RAX is the correct approach for 64-bit strcpy overflows.
+// strcpy returns the destination buffer pointer in RAX, so jumping to RAX
+// executes our shellcode at the start of the buffer (avoiding null-byte issues).
 void gadget() {
-    __asm__("jmp *%rsp");
+    __asm__("jmp *%rax");
 }
 
 void filter_bad_chars(char *input) {
