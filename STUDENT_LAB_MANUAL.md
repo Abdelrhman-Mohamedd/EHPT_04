@@ -68,3 +68,12 @@ If you are stuck or aren't familiar with Python socket programming, use these hi
 
 > **Hint 5: Architecture Matters**
 > Remember, this is a 64-bit Linux server, not a 32-bit Windows machine! Make sure your `msfvenom` payload and your registers (`RIP`/`RSP` instead of `EIP`/`ESP`) reflect the 64-bit Linux architecture!
+
+> **Hint 6: The Secret Bad Character**
+> Aside from the standard `\x00`, `\x0a`, and `\x0d`, the authentication parser also aggressively filters the `\x2b` (`+`) character! Make sure to exclude `\x2b` in your `msfvenom` payload with the `-b "\x00\x0a\x0d\x2b"` flag.
+
+> **Hint 7: Shellcode Truncation**
+> When you generate a payload with `msfvenom` (especially encoded ones like `shikata_ga_nai`), the output can be well over 100 bytes long. Make sure you copy and paste the **entire** shellcode block into your exploit script! If your shellcode is cut short, your exploit will mysteriously crash midway through execution.
+
+> **Hint 8: Shifting Memory Addresses**
+> If you ever have to recompile or update the vulnerable binary, its memory layout will shift! This means any hardcoded offsets or gadget addresses (like your `JMP RAX` address) will likely change. Always re-run `msf-pattern_offset` and `objdump` if the binary is updated!
